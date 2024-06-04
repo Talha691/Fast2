@@ -1,0 +1,174 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helpers
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) || exists(/databases/$(database)/documents/capturists/$(request.auth.uid))
+    }
+    
+    function isAgent() {
+      return exists(/databases/$(database)/documents/agents/$(request.auth.uid));
+    }
+    
+    function isGroup() {
+      return get(/databases/$(database)/documents/agents/$(request.auth.uid)).data.special == true;
+    }
+    
+    function isClient() {
+      return exists(/databases/$(database)/documents/clients/$(request.auth.uid));
+    }
+    
+    function isEmployee(agent) {
+      return exists(/databases/$(database)/documents/clients/$(request.auth.uid));
+    }
+    
+    function isEmployeeFromAgent(agent) {
+      return get(/databases/$(database)/documents/employees/$(request.auth.uid)).data.agentID == agent
+    }
+    
+    function isNotGuest(){
+    	return request.auth.token.firebase.sign_in_provider != "anonymous"
+    }
+    
+    // Must be public because these are used in the QR
+    // Admins, agents and clients can write
+    match /car-insurance/{id} {
+      allow read: if true;
+      allow write: if isAdmin() || isAgent() || isNotGuest();
+    }
+    match /truck-insurance/{id} {
+      allow read: if true;
+      allow write: if isAdmin() || isAgent() || isNotGuest();
+    }
+    
+    // Coverages
+    // Only admins can modify
+    match /coverage/{id} {
+    	allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Global Clients Data
+    match /clients/{id} {
+      allow read, write: if request.auth.uid == id || isAdmin();
+    }
+    match /clients/{id}/cards/{card} {
+      allow read, write: if request.auth.uid == id || isAdmin();
+    }
+    
+    // Agents Data
+    match /agents/{id} {
+      allow read: if true;
+      allow update: if request.resource.data.creditAmount > 0;
+      allow write: if request.auth.uid == id || isAdmin();
+    }
+    match /agents/{id}/payments/{paymentID} {
+      allow read: if isAdmin();
+      allow write: if request.auth.uid == id || isAdmin();
+    }
+    match /agents/{id}/week/{weekID} {
+      allow read: if isAdmin();
+      allow write: if request.auth.uid == id || isAdmin();
+    }
+    match /agents/{id}/clients/{client} {
+    	allow read, write:
+      	if request.auth.uid == id || request.auth.uid == client || isEmployeeFromAgent(id) || isAdmin();
+    }
+    match /agents/{id}/cards/{card} {
+      allow read, write:
+      	if request.auth.uid == id || isEmployeeFromAgent(id) || isAdmin();
+    }
+    match /agents/{id}/clients/{client}/cards/{card} {
+      allow read, write: 
+      	if request.auth.uid == id || request.auth.uid == client || isEmployeeFromAgent(id) || isAdmin();
+    }
+    //capturists data 
+      match /capturists/{id} {
+      allow read: if true;
+      allow update: if request.resource.data.creditAmount > 0;
+      allow write: if request.auth.uid == id || isAdmin();
+    }
+    match /capturists/{id}/payments/{paymentID} {
+      allow read: if isAdmin();
+      allow write: if request.auth.uid == id || isAdmin();
+    }
+    match /capturists/{id}/week/{weekID} {
+      allow read: if isAdmin();
+      allow write: if request.auth.uid == id || isAdmin();
+    }
+    match /capturists/{id}/clients/{client} {
+    	allow read, write:
+      	if request.auth.uid == id || request.auth.uid == client || isEmployeeFromAgent(id) || isAdmin();
+    }
+    match /capturists/{id}/cards/{card} {
+      allow read, write:
+      	if request.auth.uid == id || isEmployeeFromAgent(id) || isAdmin();
+    }
+    match /capturists/{id}/clients/{client}/cards/{card} {
+      allow read, write: 
+      	if request.auth.uid == id || request.auth.uid == client || isEmployeeFromAgent(id) || isAdmin();
+    }
+    
+    // Employees
+    match /employees/{id} {
+    	allow read: if true
+      allow write: if isAgent() || isAdmin();
+    }
+    
+    // Expenses
+    match /expenses/{id} {
+    	allow read, write: if isAdmin()
+    }
+    match /expense-categories/{id} {
+    	allow read, write: if isAdmin()
+    }
+    
+    // Invoices
+    match /invoices/{id} {
+    	allow read, write: if isAdmin()
+    }
+    
+    // Notifications
+    match /notifications/{id} {
+    	allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /tokens/{id} {
+    	allow read, write: if request.auth != null;
+    }
+    
+    // App Users
+     match /appUsers/{id} {
+    	allow read, write: if request.auth != null;
+    }
+    
+    // Configuration
+    match /configuration/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Claims
+    match /claims/{id} {
+    	allow read, write: if true;
+    }
+    
+    // Drafts
+     match /drafts/{id} {
+      allow read: if true;
+      allow write: if request.auth.uid == id || isAdmin() || isAgent() || isNotGuest();
+    }
+    
+    // Test Insurances
+    match /test/{id} {
+      allow read, write: if true;
+    }
+    
+    // Only Admins can create more users/agents
+    // but Agents can see their own data
+    match /users/{id} {
+    	allow read: if isAdmin()
+      allow write: if isAdmin();
+    }
+  }
+}

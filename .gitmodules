@@ -1,0 +1,6 @@
+[submodule "functions/ghostscript"]
+	path = functions/ghostscript
+	url = https://github.com/studiomediaagency/ghostscript/
+[submodule "functions/functions/ghostscript"]
+	path = functions/functions/ghostscript
+	url = https://github.com/studiomediaagency/ghostscript/

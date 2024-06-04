@@ -1,0 +1,39 @@
+.page {
+  height: 100%;
+}
+
+.container {
+  padding: 30px;
+}
+
+.content {
+  padding: 60px;
+  background-color: #fff;
+  border-radius: 10px !important;
+}
+
+.file-input::-webkit-file-upload-button {
+  visibility: hidden;
+  width: 200px;
+  padding: 8px;
+  outline-style: hidden;
+}
+
+.file-input::before {
+  content: "Choose a file";
+  color: #fff;
+  width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: #11489F;
+  border-radius: 3px;
+  padding: 10px 8px;
+  outline-style: hidden;
+  white-space: nowrap;
+  -webkit-user-select: none;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 12pt;
+}

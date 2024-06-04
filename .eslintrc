@@ -1,0 +1,11 @@
+{
+  "parserOptions": {
+    // Required for certain syntax usages
+    "ecmaVersion": 2017
+  },
+  "extends": "react-app",
+  "rules": {
+    // MY RULES
+    "quotes": [2, "double", { "avoidEscape": true }]
+  }
+}
